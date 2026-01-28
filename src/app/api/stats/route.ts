@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { events } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   const since = sql`now() - (${days} || ' days')::interval`;
 
-  const totals = await db
+  const totals = await getDb()
     .select({
       total: sql<number>`count(*)::int`,
       uniques: sql<number>`count(distinct ${events.ipHash})::int`,
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     .from(events)
     .where(sql`${events.site} = ${site} and ${events.createdAt} >= ${since}`);
 
-  const topPages = await db
+  const topPages = await getDb()
     .select({
       path: events.path,
       views: sql<number>`count(*)::int`,
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     .orderBy(desc(sql`count(*)`))
     .limit(10);
 
-  const topReferrers = await db
+  const topReferrers = await getDb()
     .select({
       referrer: events.referrer,
       views: sql<number>`count(*)::int`,

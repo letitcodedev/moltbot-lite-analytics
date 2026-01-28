@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { events } from "@/db/schema";
 
 function sha256(input: string) {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const event = String(body.event || "pageview").slice(0, 64);
     const value = typeof body.value === "number" ? Math.trunc(body.value) : null;
 
-    await db.insert(events).values({ site, path, referrer, ua, ipHash, event, value });
+    await getDb().insert(events).values({ site, path, referrer, ua, ipHash, event, value });
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
     const ipHash = ip ? sha256(ip) : null;
 
-    await db.insert(events).values({
+    await getDb().insert(events).values({
       site,
       path,
       referrer,
