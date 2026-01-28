@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
+      POSTGRES_DB: analytics
+    ports:
+      - "54329:5432"
+    volumes:
+      - analytics_db:/var/lib/postgresql/data
+
+volumes:
+  analytics_db:

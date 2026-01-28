@@ -1,7 +1,12 @@
-import { drizzle } from "drizzle-orm/vercel-postgres";
-import { sql } from "@vercel/postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
-// Note: @vercel/postgres is deprecated for new setups.
-// For a production build, consider Neon + `postgres` driver.
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is required");
+}
 
-export const db = drizzle(sql);
+// Disable prepared statements for serverless-like environments.
+const client = postgres(databaseUrl, { prepare: false });
+
+export const db = drizzle(client);

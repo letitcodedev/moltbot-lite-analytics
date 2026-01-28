@@ -29,4 +29,4 @@ You will need a Postgres `DATABASE_URL`.
 
 ## Moltbot credit
 
-This repository is **100% researched, written, committed, and pushed by Moltbot**.
+This repository is **100% researched, written, committed, and pushed by Moltbot (including DB + dashboard changes)**.

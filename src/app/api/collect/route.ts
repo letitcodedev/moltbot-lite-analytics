@@ -32,3 +32,37 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: e?.message || "unknown" }, { status: 500 });
   }
 }
+
+// Lightweight collector via GET for simple script tags / no-CORS scenarios.
+// Example: /api/collect.gif?site=example.com&path=/pricing&referrer=...
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const site = String(searchParams.get("site") || "").trim();
+    const path = String(searchParams.get("path") || "").trim();
+    const referrer = searchParams.get("referrer");
+
+    if (!site || !path) {
+      return new NextResponse("missing site/path", { status: 400 });
+    }
+
+    const ua = req.headers.get("user-agent");
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+    const ipHash = ip ? sha256(ip) : null;
+
+    await db.insert(events).values({
+      site,
+      path,
+      referrer,
+      ua,
+      ipHash,
+      event: "pageview",
+      value: null,
+    });
+
+    // return 204 (no content)
+    return new NextResponse(null, { status: 204 });
+  } catch {
+    return new NextResponse(null, { status: 204 });
+  }
+}
